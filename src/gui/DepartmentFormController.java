@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -20,6 +23,7 @@ import model.services.DepartmentService;
 public class DepartmentFormController implements Initializable {
 	private Department entity;
 	private DepartmentService service;
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 	@FXML
 	private TextField txtId;
 
@@ -37,18 +41,26 @@ public class DepartmentFormController implements Initializable {
 
 	@FXML
 	public void onbtnSaveAction(ActionEvent event) {
-		if(entity == null) {
+		if (entity == null) {
 			throw new IllegalStateException("entity was null :/");
 		}
-		if(service == null) {
+		if (service == null) {
 			throw new IllegalStateException("service was null :/");
 		}
 		try {
 			entity = getFormData();
 			service.saveOrUpdate(entity);
+			notifysubcribeDataChangeListener();
 			Utils.currentStage(event).close();
-		}catch(DbException e) {
+		} catch (DbException e) {
 			Alerts.showAlerts("error saving department", null, e.getMessage(), AlertType.ERROR);
+		}
+
+	}
+
+	private void notifysubcribeDataChangeListener() {
+		for(DataChangeListener listener : dataChangeListeners) {
+			listener.onDataChanged();
 		}
 		
 	}
@@ -58,7 +70,7 @@ public class DepartmentFormController implements Initializable {
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
 		obj.setName(txtName.getText());
 		return obj;
-		
+
 	}
 
 	@FXML
@@ -70,9 +82,15 @@ public class DepartmentFormController implements Initializable {
 	public void SetDepartment(Department entity) {
 		this.entity = entity;
 	}
+
 	public void SetDepartmentService(DepartmentService service) {
 		this.service = service;
 	}
+
+	public void subcribeDataChangeListener(DataChangeListener listener) {
+		dataChangeListeners.add(listener);
+	}
+
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		initializeNodes();
@@ -86,7 +104,7 @@ public class DepartmentFormController implements Initializable {
 	}
 
 	public void updateFormData() {
-		if(entity == null) {
+		if (entity == null) {
 			throw new IllegalStateException("entity was null :/");
 		}
 		txtId.setText(String.valueOf(entity.getId()));
