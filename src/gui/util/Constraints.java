@@ -20,9 +20,9 @@ public class Constraints {
 		});
 	}
 
-	public static void setTextFildDouble(TextField txt, int max) {
+	public static void setTextFildDouble(TextField txt) {
 		txt.textProperty().addListener((obs, oldValue, newValue) -> {
-			if (newValue != null && newValue.length() > max) {
+			if (newValue != null && !newValue.matches("\\d*([\\.]\\d*)?")) {
 				txt.setText(oldValue);
 			}
 		});
