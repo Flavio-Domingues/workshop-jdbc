@@ -1,9 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -106,10 +108,29 @@ public class SellerFormController implements Initializable {
 		if (txtName.getText() == null || txtName.getText().trim().equals("")) {
 			exception.addError("name", "campo obrigatório!");
 		}
+		obj.setName(txtName.getText());
+
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			exception.addError("email", "campo obrigatório!");
+		}
+		obj.setEmail(txtEmail.getText());
+
+		if (dpBirthDate.getValue() == null) {
+			exception.addError("birthDate", "campo obrigatório!");
+		} else {
+			Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+			obj.setBirthDate(Date.from(instant));
+		}
+		if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
+			exception.addError("baseSalary", "campo obrigatório!");
+		}
+		obj.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+		obj.setDepartment(comboBoxDepartment.getValue());
+
 		if (exception.getError().size() > 0) {
 			throw exception;
 		}
-		obj.setName(txtName.getText());
+
 		return obj;
 
 	}
@@ -162,9 +183,9 @@ public class SellerFormController implements Initializable {
 
 		Locale.setDefault(Locale.US);
 		txtBaseSalary.setText(String.format("%.2f", entity.getBaseSalary()));
-		if(entity.getDepartment()== null) {
+		if (entity.getDepartment() == null) {
 			comboBoxDepartment.getSelectionModel().selectFirst();
-		}else {
+		} else {
 			comboBoxDepartment.setValue(entity.getDepartment());
 		}
 		comboBoxDepartment.setValue(entity.getDepartment());
@@ -172,9 +193,10 @@ public class SellerFormController implements Initializable {
 
 	public void setMessageError(Map<String, String> errors) {
 		Set<String> filds = errors.keySet();
-		if (filds.contains("name")) {
-			lblErrorName.setText(errors.get("name"));
-		}
+		lblErrorName.setText((filds.contains("name") ? errors.get("name") : ""));
+		lblErrorEmail.setText((filds.contains("email") ? errors.get("email") : ""));
+		lblErrorBirthDate.setText((filds.contains("birthDate") ? errors.get("birthDate") : ""));
+		lblErrorBaseSalary.setText((filds.contains("baseSalary") ? errors.get("baseSalary") : ""));
 	}
 
 	public void loadAssociateObjects() {
